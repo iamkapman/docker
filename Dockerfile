@@ -5,7 +5,7 @@ RUN \
     apt-get update && \
     apt-get upgrade -y
 RUN apt-get install -y \
-    git git-core nano screen curl unzip locales \
+    git git-core nano screen curl unzip locales wget \
     php php-cli php-common php-intl php-json php-mysql php-gd php-imagick php-curl php-mcrypt php-mbstring php-dev php-xdebug
 
 # PHP
@@ -13,9 +13,9 @@ RUN apt-get install -y \
 #RUN sed -i -e "s/post_max_size = 8M/post_max_size = 20M/g" /etc/php/7.0/fpm/php.ini
 #RUN sed -i -e "s/upload_max_filesize = 2M/upload_max_filesize = 20M/g" /etc/php/7.0/fpm/php.ini
 #RUN echo "cgi.fix_pathinfo = 0;" >> /etc/php/7.0/fpm/php.ini
-RUN rm /etc/php/7.0/fpm/php.ini
-COPY docker/php.ini /etc/php/7.0/fpm/php.ini
-COPY docker/20-xdebug.ini /etc/php/7.0/fpm/conf.d/
+#RUN rm /etc/php/7.0/fpm/php.ini
+#COPY docker/php.ini /etc/php/7.0/fpm/php.ini
+#COPY docker/20-xdebug.ini /etc/php/7.0/fpm/conf.d/
 
 # MySQL
 # https://stackoverflow.com/questions/7739645/install-mysql-on-ubuntu-without-password-prompt
@@ -27,8 +27,8 @@ RUN apt-get install -y mysql-server mysql-client
 RUN \
     wget http://nginx.org/keys/nginx_signing.key && \
     apt-key add nginx_signing.key && \
-    echo "deb http://nginx.org/packages/ubuntu/ codename nginx" >> /etc/apt/sources.list && \
-    echo "deb-src http://nginx.org/packages/ubuntu/ codename nginx" >> /etc/apt/sources.list && \
+    echo "deb http://nginx.org/packages/ubuntu/ xenial nginx" >> /etc/apt/sources.list && \
+    echo "deb-src http://nginx.org/packages/ubuntu/ xenial nginx" >> /etc/apt/sources.list && \
     apt-get update && \
     apt-get install nginx
 #COPY conf/website /etc/nginx/sites-available/website
