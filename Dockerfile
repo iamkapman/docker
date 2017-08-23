@@ -1,5 +1,7 @@
 FROM ubuntu:16.04
 
+MAINTAINER Alexander Evlanov "https://github.com/iamkapman/docker"
+
 # Update & install soft
 RUN \
     apt-get update && \
@@ -9,9 +11,10 @@ RUN apt-get install -y \
     php php-cli php-common php-intl php-json php-mysql php-gd php-imagick php-curl php-mcrypt php-mbstring php-dev php-xdebug
 
 # PHP
-#RUN sed -i -e "s/short_open_tag = Off/short_open_tag = On/g" /etc/php/7.0/fpm/php.ini
-#RUN sed -i -e "s/post_max_size = 8M/post_max_size = 20M/g" /etc/php/7.0/fpm/php.ini
-#RUN sed -i -e "s/upload_max_filesize = 2M/upload_max_filesize = 20M/g" /etc/php/7.0/fpm/php.ini
+RUN sed -i -e "s/short_open_tag = Off/short_open_tag = On/g" /etc/php/7.0/fpm/php.ini
+RUN sed -i -e "s/post_max_size = 8M/post_max_size = 65M/g" /etc/php/7.0/fpm/php.ini
+RUN sed -i -e "s/upload_max_filesize = 2M/upload_max_filesize = 64M/g" /etc/php/7.0/fpm/php.ini
+RUN mkdir /run/php/
 #RUN echo "cgi.fix_pathinfo = 0;" >> /etc/php/7.0/fpm/php.ini
 #RUN rm /etc/php/7.0/fpm/php.ini
 #COPY docker/php.ini /etc/php/7.0/fpm/php.ini
@@ -31,17 +34,16 @@ RUN \
     echo "deb-src http://nginx.org/packages/ubuntu/ xenial nginx" >> /etc/apt/sources.list && \
     apt-get update && \
     apt-get install nginx
-#COPY conf/website /etc/nginx/sites-available/website
-#RUN ln -s /etc/nginx/sites-available/website /etc/nginx/sites-enabled/website
-#RUN rm /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
+COPY conf/nginx.conf /etc/nginx/nginx.conf
+#RUN rm /etc/nginx/conf.d/default.conf
 
 # SSH
 RUN apt-get install -y openssh-server openssh-client
 RUN mkdir /var/run/sshd
 # Change password
 RUN echo 'root:passwd' | chpasswd
-#RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+#RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 # SSH login fix. Otherwise user is kicked off after login
 RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 ENV NOTVISIBLE "in users profile"
@@ -58,6 +60,7 @@ RUN mv composer.phar /usr/bin/composer
 
 # Locale
 RUN locale-gen en_US.UTF-8
+RUN dpkg-reconfigure locales
 
 # Supervisor
 RUN \
