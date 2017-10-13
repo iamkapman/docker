@@ -2,6 +2,8 @@ FROM ubuntu:16.04
 
 MAINTAINER Alexander Evlanov "https://github.com/iamkapman/docker"
 
+ENV DEBIAN_FRONTEND noninteractive
+
 # Update & install soft
 RUN \
     apt-get update && \
@@ -25,6 +27,8 @@ RUN mkdir /run/php/
 RUN echo "mysql-server mysql-server/root_password password root" | debconf-set-selections
 RUN echo "mysql-server mysql-server/root_password_again password root" | debconf-set-selections
 RUN apt-get install -y mysql-server mysql-client
+RUN mkdir -p /var/run/mysqld
+RUN chown -R mysql:mysql /var/run/mysqld
 
 # NGINX
 RUN \
@@ -68,7 +72,10 @@ RUN \
     mkdir -p /var/log/supervisor
 COPY conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-#open ports
+# Volumes
+VOLUME ["/var/lib/mysql"]
+
+# Open ports
 EXPOSE 80 22 9000
 
 CMD ["/usr/bin/supervisord", "-n"]
